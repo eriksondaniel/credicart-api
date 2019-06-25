@@ -6,8 +6,7 @@ module.exports = (sequelize, DataType) => {
       autoIncrement: true
     },
     clienteUid: {
-      type: DataType.UUID,
-      unique: true,
+      type: DataType.STRING(50),
       allowNull: false
     },
     clienteFirstName: {
