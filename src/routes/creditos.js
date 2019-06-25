@@ -58,7 +58,7 @@ module.exports = app => {
       var valorVehiculo = body.valorVehiculo
       var montoInicial = (valorVehiculo * body.cuotaInicial) / 100
       console.log(montoInicial);
-      
+
       var plazoPago = body.cuota
       if (body.tasa == 'TEA') {
         TEM = Math.pow(1 + TEA, 1 / 12) - 1
@@ -126,7 +126,7 @@ module.exports = app => {
               desgravamenCuota = re(nuevoSaldo * tasaDesgravamen)
               interesCuota = re(nuevoSaldo * TEM)
               seguroCuota = re(valorVehiculo * tasaSeguroVehicularMensual)
-              saldoMostrar = nuevoSaldo + interesCuota2 + desgravamenCuota + seguroCuota
+              saldoMostrar = re(nuevoSaldo + interesCuota2 + desgravamenCuota + seguroCuota)
             }
             else if (tipoPeriodoGracia == 'Parcial') {
               console.log("Parcial");
@@ -168,14 +168,14 @@ module.exports = app => {
           nuevoSaldo = saldoMostrar
         }
         else {
-          nuevoSaldo = nuevoSaldo - amortizacionCuota
+          nuevoSaldo = re(nuevoSaldo - amortizacionCuota)
         }
         nuevoSaldo2 = nuevoSaldo3
         if (periodoGracia) {
           if (cuotaFPG == i) {
-            desgravamenMensual = saldoMostrar * tasaDesgravamen
-            interesMesUno = nuevoSaldo3 * TEM
-            interesMesPrestamo = saldoMostrar * TEM
+            desgravamenMensual = re(saldoMostrar * tasaDesgravamen)
+            interesMesUno = re(nuevoSaldo3 * TEM)
+            interesMesPrestamo = re(saldoMostrar * TEM)
             cuotaInicial = re(nuevoSaldo3 * (TEM / (1 - Math.pow((1 + TEM), - (plazoPago - cuotaFPG - 1)))))
             amortizacionUno = re(cuotaInicial - interesMesUno)
             cuotaTotal = re(desgravamenMensual + seguroVehicular + interesMesPrestamo + amortizacionUno + envioFisico)
