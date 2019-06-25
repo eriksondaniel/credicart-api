@@ -56,13 +56,16 @@ module.exports = app => {
       const tasaDesgravamen = (0.006 * 30) / 360
       //INPUTS
       var valorVehiculo = body.valorVehiculo
-      var montoInicial = body.cuotaInicial
+      var montoInicial = (valorVehiculo * body.cuotaInicial) / 100
+      console.log(montoInicial);
+      
       var plazoPago = body.cuota
-      if (body.tasa = 'TEA') {
+      if (body.tasa == 'TEA') {
         TEM = Math.pow(1 + TEA, 1 / 12) - 1
-      } else if (body.tasa = 'TEM') {
+      } else if (body.tasa == 'TNA') {
         TEM = Math.pow(1 + TNA / 360, 30) - 1
       }
+
       var tasaSeguroVehicularMensual
       switch (body.tipoSeguroVehicular) {
         case 'Bajo riesgo':
