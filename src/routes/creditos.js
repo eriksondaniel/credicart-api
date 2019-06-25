@@ -46,7 +46,8 @@ module.exports = app => {
       var cuotaInicial = 0
       var amortizacionUno = 0
       var cuotaTotal = 0
-      var VAN
+      var van
+
       var TEM
       //CONSTANTES
       const envioFisico = 10
@@ -82,8 +83,8 @@ module.exports = app => {
       var COK = body.costoOportunidad
       var periodoGracia = body.periodoGracia
       var tipoPeriodoGracia = body.tipoPeriodoGracia
-      var cuotaIPG = body.cuotaIPG
-      var cuotaFPG = body.cuotaFPG
+      var cuotaIPG = body.cuotaIPG - 1
+      var cuotaFPG = body.cuotaFPG - 1
 
       //CALCULOS
       prestamo = valorVehiculo - montoInicial
@@ -95,7 +96,7 @@ module.exports = app => {
       cuotaInicial = re(financiamientoCuotas * (TEM / (1 - Math.pow((1 + TEM), - plazoPago))))
       amortizacionUno = re(cuotaInicial - interesMesUno)
       cuotaTotal = re(desgravamenMensual + seguroVehicular + interesMesPrestamo + amortizacionUno + envioFisico)
-      VAN = -prestamo
+      van = -prestamo
 
       //CALCULOS TABLA
       var nuevoSaldo = prestamo
@@ -107,13 +108,12 @@ module.exports = app => {
       var nuevoSaldo3 = 0
       var saldoMostrar = 0
       var seguroCuota = 0
-      var ultimacuota = 0
-      for (let i = 0; i <= plazoPago; i++) {
+      var teCOK = Math.pow(1 + COK, 1 / 12) - 1
+
+      for (let i = 0; i <= plazoPago - 1; i++) {
 
         //Plazo de gracias
         if (cuotaIPG <= i && cuotaFPG >= i) {
-          console.log("if" + i);
-
           if (periodoGracia) {
             if (tipoPeriodoGracia == 'Total') {
               cuotaTotal = 0
@@ -133,13 +133,11 @@ module.exports = app => {
               desgravamenCuota = re(nuevoSaldo * tasaDesgravamen)
               interesCuota = re(nuevoSaldo * TEM)
               seguroCuota = re(valorVehiculo * tasaSeguroVehicularMensual)
-              cuotaTotal = interesCuota + desgravamenCuota + seguroCuota
+              cuotaTotal = re(interesCuota + desgravamenCuota + seguroCuota)
               saldoMostrar = nuevoSaldo
-
             }
           }
         } else {
-          console.log("else" + i);
           //Atras
           interesCuota2 = re(nuevoSaldo2 * TEM)
           amortizacionCuota = re(cuotaInicial - interesCuota2)
@@ -151,11 +149,15 @@ module.exports = app => {
           var cuota = re(desgravamenCuota + seguroCuota + interesCuota + amortizacionCuota + envioFisico)
           saldoMostrar = re(nuevoSaldo - amortizacionCuota) //saldo final
         }
+
+        van = re((van + (cuotaTotal / Math.pow(1 + teCOK, i + 1))))
+
         tabla.push({
-          cuotaTotal, nuevoSaldo,
+          i, cuotaTotal, nuevoSaldo,
           desgravamenCuota, seguroCuota, amortizacionCuota,
           interesCuota, envioFisico, cuota,
-          nuevoSaldo2, interesCuota2, nuevoSaldo3, saldoMostrar
+          nuevoSaldo2, interesCuota2, nuevoSaldo3, saldoMostrar,
+          van
         })
 
         // nuevoSaldo = saldoMostrar
@@ -171,35 +173,50 @@ module.exports = app => {
             desgravamenMensual = saldoMostrar * tasaDesgravamen
             interesMesUno = nuevoSaldo3 * TEM
             interesMesPrestamo = saldoMostrar * TEM
-            cuotaInicial = re(nuevoSaldo3 * (TEM / (1 - Math.pow((1 + TEM), - (plazoPago - cuotaFPG - 2)))))
+            cuotaInicial = re(nuevoSaldo3 * (TEM / (1 - Math.pow((1 + TEM), - (plazoPago - cuotaFPG - 1)))))
             amortizacionUno = re(cuotaInicial - interesMesUno)
             cuotaTotal = re(desgravamenMensual + seguroVehicular + interesMesPrestamo + amortizacionUno + envioFisico)
             console.log(cuotaTotal);
           }
         }
 
+        //DIME QUE HAG0 ?
+        // if (i == plazoPago) {
+        //   console.log("plazoPago : " + i);
+        //   desgravamenMensual = saldoMostrar * tasaDesgravamen
+        //   interesMesUno = nuevoSaldo3 * TEM
+        //   interesMesPrestamo = saldoMostrar * TEM
+        //   cuotaTotal = re(desgravamenMensual + seguroVehicular + interesMesPrestamo + amortizacionUno + envioFisico)
+        //   amortizacionCuota = nuevoSaldo2
+        //   ultimacuota = amortizacionCuota + desgravamenMensual + interesMesUno + interesMesPrestamo + envioFisico
+        //   cuotaTotal = ultimacuota
 
+        //   tabla.push({
+        //     cuotaTotal, nuevoSaldo,
+        //     desgravamenCuota, seguroCuota, amortizacionCuota,
+        //     interesCuota, envioFisico, cuota,
+        //     nuevoSaldo2, interesCuota2, nuevoSaldo3, saldoMostrar,
+        //     van,
+        //     amortizacionUno
+        //   })
+        // }
       }
 
-
-      desgravamenMensual = saldoMostrar * tasaDesgravamen
-      interesMesUno = nuevoSaldo3 * TEM
-      interesMesPrestamo = saldoMostrar * TEM
-      cuotaTotal = re(desgravamenMensual + seguroVehicular + interesMesPrestamo + amortizacionUno + envioFisico)
-      amortizacionCuota = saldoMostrar
-      ultimacuota = amortizacionCuota + desgravamenMensual + interesMesUno + interesMesPrestamo + envioFisico
-      cuotaTotal = ultimacuota
-      finalTabla = {
-        montoInicial, plazoPago, valorVehiculo,
-        prestamo, desgravamenMensual, seguroVehicular,
-        financiamientoCuotas, interesMesUno, interesMesPrestamo,
-        cuotaInicial, amortizacionUno, cuotaTotal
-      }
+      // desgravamenMensual = saldoMostrar * tasaDesgravamen
+      // interesMesUno = nuevoSaldo3 * TEM
+      // interesMesPrestamo = saldoMostrar * TEM
+      // cuotaTotal = re(desgravamenMensual + seguroVehicular + interesMesPrestamo + amortizacionUno + envioFisico)
+      // amortizacionUno = 9999999999
+      // ultimacuota = amortizacionUno + desgravamenMensual + interesMesUno + interesMesPrestamo + envioFisico
+      // cuotaTotal = ultimacuota
+      // finalTabla = {
+      //   montoInicial, plazoPago, valorVehiculo,
+      //   prestamo, desgravamenMensual, seguroVehicular,
+      //   financiamientoCuotas, interesMesUno, interesMesPrestamo,
+      //   cuotaInicial, amortizacionUno, cuotaTotal
+      // }
       responseTabla = {
-        montoInicial, plazoPago, valorVehiculo,
-        prestamo, desgravamenMensual, seguroVehicular,
-        financiamientoCuotas, interesMesUno, interesMesPrestamo,
-        cuotaInicial, amortizacionUno, cuotaTotal, tabla, finalTabla
+        tabla
       }
       response = {
         responseTabla,
