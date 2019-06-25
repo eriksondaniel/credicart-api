@@ -1,0 +1,35 @@
+{
+  "name": "api-finanzas",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "./node_modules/.bin/babel src --out-dir dist",
+    "babel-node": "babel-node src/index.js",
+    "dev": "nodemon --exec npm run babel-node",
+    "start": "node dist/"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@babel/node": "^7.2.2",
+    "@babel/polyfill": "^7.4.4",
+    "consign": "^0.1.6",
+    "core-js": "2",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "firebase-admin": "^8.2.0",
+    "mysql": "^2.16.0",
+    "mysql2": "^1.6.4",
+    "pg": "^7.9.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^4.41.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.6",
+    "@babel/preset-env": "^7.1.6",
+    "nodemon": "^1.18.7"
+  }
+}
